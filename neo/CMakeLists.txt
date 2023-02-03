@@ -221,7 +221,7 @@ endif()
 
 find_package(CURL QUIET)
 if(CURL_FOUND)
-	set(ID_ENABLE_CURL ON)
+	set(ID_ENABLE_CURL OFF)
 	include_directories(${CURL_INCLUDE_DIR})
 	message(STATUS "libcurl found and enabled")
 else()
@@ -233,7 +233,7 @@ endif()
 if(MSVC)
 	# This is required for tools on windows.
 	find_package(MFC)
-	
+
 	if(TOOLS AND NOT MFC_FOUND)
 		message(SEND_ERROR "MFC ('Microsoft Foundation Classes for C++') couldn't be found, but is needed for TOOLS!")
 		message(FATAL_ERROR "If you're using VS2013, you'll also need the 'Multibyte MFC Library for Visual Studio 2013': https://www.microsoft.com/en-us/download/details.aspx?id=40770 (VS2015 and 2017 include that in the default MFC package)")
@@ -293,7 +293,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	# dear idiot compilers, don't fuck up math code with useless FMA "optimizations"
 	# (https://gcc.gnu.org/bugzilla/show_bug.cgi?id=100839)
 	add_compile_options(-ffp-contract=off)
-	
+
 	if(ASAN)
 		# if this doesn't work, ASan might not be available on your platform, don't set ASAN then..
 		add_compile_options(-fsanitize=address)
@@ -321,7 +321,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	if(cxx_has_Woverload_virtual)
 		add_compile_options(-Woverloaded-virtual)
 	endif()
-	
+
 	# shut up about using memcpy() on classes, in the cases doom3 uses it it seems to be fine
 	CHECK_CXX_COMPILER_FLAG("-Wno-class-memaccess" cxx_has_Wno-class-memaccess)
 	if(cxx_has_Wno-class-memaccess)
@@ -373,7 +373,7 @@ if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID STREQUAL "Clang")
 	endif()
 elseif(MSVC)
 	add_compile_options(/MP) # parallel build (use all cores, or as many as configured in VS)
-	
+
 	add_compile_options(/W3) # TODO: was /W4, caused trouble with VS2019 (and/or its integrated CMake? or only HarrieVG's setup?)
 	add_compile_options(/we4840) # treat as error when passing a class to a vararg-function (probably printf-like)
 	# treat several kinds of truncating int<->pointer conversions as errors (for more 64bit-safety)
@@ -955,7 +955,7 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 	# sound editor?
 	file(GLOB src_sound_editor "tools/sound/*.cpp")
 	add_globbed_headers(src_sound_editor "tools/sound")
-	
+
 
 	# The numerous tools in a nice list.
 	list(APPEND src_editor_tools
@@ -1110,7 +1110,7 @@ if(HARDLINK_GAME)
 		if(D3XP)
 			message(WARNING "hardlinking the base game, d3xp will not be supported (disable BASE for D3XP support with HARDLINK_GAME)")
 		endif()
-		
+
 	elseif(D3XP)
 		set(src_core ${src_core} ${src_d3xp})
 		set(game_includes "${CMAKE_SOURCE_DIR}/d3xp")
@@ -1124,7 +1124,7 @@ if(CORE)
 		${src_sys_core}
 		${src_editor_tools}
 	)
-	
+
 	if(MSVC AND CMAKE_MAJOR_VERSION GREATER 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_VERSION GREATER_EQUAL 6 ))
 		# CMake >= 3.6 supports setting the default project started for debugging (instead of trying to launch ALL_BUILD ...)
 		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DHEWM3BINARY})
@@ -1167,7 +1167,7 @@ if(DEDICATED)
 		${src_sys_base}
 		${src_debuggerServer}
 	)
-	
+
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_stub_openal} ${src_stub_gl} ${src_debuggerServer})
 
 if(HARDLINK_GAME)
@@ -1201,9 +1201,9 @@ if(BASE AND NOT HARDLINK_GAME)
 	else()
 		add_library(base SHARED ${src_game})
 	endif()
-	
+
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_game})
-	
+
 	set_target_properties(base PROPERTIES PREFIX "")
 	set_target_properties(base PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
 	target_include_directories(base PRIVATE "${CMAKE_SOURCE_DIR}/game")
