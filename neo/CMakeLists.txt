@@ -247,7 +247,7 @@ endif()
 
 find_package(CURL QUIET)
 if(CURL_FOUND)
-	set(ID_ENABLE_CURL ON)
+	set(ID_ENABLE_CURL OFF)
 	include_directories(${CURL_INCLUDE_DIR})
 	message(STATUS "libcurl found and enabled")
 else()
@@ -262,7 +262,7 @@ set(D3_COMPILER_IS_GCC_OR_CLANG FALSE)
 if(MSVC)
 	# This is required for tools on windows.
 	find_package(MFC)
-	
+
 	if(TOOLS AND NOT MFC_FOUND)
 		message(SEND_ERROR "MFC ('Microsoft Foundation Classes for C++') couldn't be found, but is needed for TOOLS!")
 		message(FATAL_ERROR "If you're using VS2013, you'll also need the 'Multibyte MFC Library for Visual Studio 2013': https://www.microsoft.com/en-us/download/details.aspx?id=40770 (VS2015 and 2017 include that in the default MFC package)")
@@ -317,8 +317,6 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 
 	if(NOT CMAKE_CROSSCOMPILING AND ONATIVE)
 		add_compile_options(-march=native)
-	elseif(NOT APPLE AND cpu STREQUAL "x86")
-		add_compile_options(-march=pentium3)
 	endif()
 
 	if(FORCE_COLORED_OUTPUT)
@@ -332,9 +330,10 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	set(CMAKE_C_FLAGS_DEBUG "-g -ggdb -D_DEBUG -O0")
 	set(CMAKE_C_FLAGS_DEBUGALL "-g -ggdb -D_DEBUG")
 	set(CMAKE_C_FLAGS_PROFILE "-g -ggdb -D_DEBUG -O1 -fno-omit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELEASE "-O2 -fno-math-errno -fno-trapping-math  -ffinite-math-only -fomit-frame-pointer")
-	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -ggdb -O2 -fno-math-errno -fno-trapping-math  -ffinite-math-only -fno-omit-frame-pointer")
-	set(CMAKE_C_FLAGS_MINSIZEREL "-Os -fno-math-errno -fno-trapping-math  -ffinite-math-only -fomit-frame-pointer")
+	set(CMAKE_C_FLAGS_RELEASE "-march=x86-64-v3 -O3 -flto=thin -fdata-sections -ffunction-sections -fvisibility=hidden -fno-math-errno -fno-trapping-math  -ffinite-math-only -fomit-frame-pointer")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -flto=thin -Wl,--gc-sections -Wl,--icf=all")
+	set(CMAKE_C_FLAGS_RELWITHDEBINFO "-g -ggdb -O2 -fno-math-errno -fno-trapping-math -fno-omit-frame-pointer")
+	set(CMAKE_C_FLAGS_MINSIZEREL "-Os -fno-math-errno -fno-trapping-math -fomit-frame-pointer")
 
 	set(CMAKE_CXX_FLAGS_DEBUGALL ${CMAKE_C_FLAGS_DEBUGALL})
 	set(CMAKE_CXX_FLAGS_PROFILE ${CMAKE_C_FLAGS_PROFILE})
@@ -346,7 +345,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	if(cxx_has_fp-contract)
 		add_compile_options(-ffp-contract=off)
 	endif()
-	
+
 	if(ASAN)
 		# if this doesn't work, ASan might not be available on your platform, don't set ASAN then..
 		add_compile_options(-fsanitize=address)
@@ -374,7 +373,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	if(cxx_has_Woverload_virtual)
 		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Woverloaded-virtual")
 	endif()
-	
+
 	# shut up about using memcpy() on classes, in the cases doom3 uses it it seems to be fine
 	CHECK_CXX_COMPILER_FLAG("-Wno-class-memaccess" cxx_has_Wno-class-memaccess)
 	if(cxx_has_Wno-class-memaccess)
@@ -434,7 +433,7 @@ if(D3_COMPILER_IS_GCC_OR_CLANG)
 	endif()
 elseif(MSVC)
 	add_compile_options(/MP) # parallel build (use all cores, or as many as configured in VS)
-	
+
 	add_compile_options(/W3) # TODO: was /W4, caused trouble with VS2019 (and/or its integrated CMake? or only HarrieVG's setup?)
 	add_compile_options(/we4840) # treat as error when passing a class to a vararg-function (probably printf-like)
 	# treat several kinds of truncating int<->pointer conversions as errors (for more 64bit-safety)
@@ -818,15 +817,15 @@ if(IMGUI)
 
 set(src_imgui ${src_imgui}
 	libs/imgui/backends/imgui_impl_opengl2.cpp
-	
+
 	libs/imgui/imgui.h
 	libs/imgui/imgui.cpp
 	libs/imgui/imgui_draw.cpp
 	libs/imgui/imgui_tables.cpp
 	libs/imgui/imgui_widgets.cpp
-	
+
 	libs/imgui/imgui_demo.cpp
-	
+
 	sys/sys_imgui.h
 	sys/sys_imgui.cpp
 	sys/imgui_savestyle.cpp
@@ -1078,7 +1077,7 @@ if (TOOLS AND MFC_FOUND AND MSVC)
 	# sound editor?
 	file(GLOB src_sound_editor "tools/sound/*.cpp")
 	add_globbed_headers(src_sound_editor "tools/sound")
-	
+
 
 	# The numerous tools in a nice list.
 	list(APPEND src_editor_tools
@@ -1240,7 +1239,7 @@ if(HARDLINK_GAME)
 		if(D3XP)
 			message(WARNING "hardlinking the base game, d3xp will not be supported (disable BASE for D3XP support with HARDLINK_GAME)")
 		endif()
-		
+
 	elseif(D3XP)
 		set(src_core ${src_core} ${src_d3xp})
 		set(game_includes "${CMAKE_SOURCE_DIR}/d3xp")
@@ -1255,7 +1254,7 @@ if(CORE)
 		${src_imgui}
 		${src_editor_tools}
 	)
-	
+
 	if(MSVC AND CMAKE_MAJOR_VERSION GREATER 3 OR ( CMAKE_MAJOR_VERSION EQUAL 3 AND CMAKE_MINOR_VERSION GREATER_EQUAL 6 ))
 		# CMake >= 3.6 supports setting the default project started for debugging (instead of trying to launch ALL_BUILD ...)
 		set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DHEWM3BINARY})
@@ -1299,7 +1298,7 @@ if(DEDICATED)
 		${src_sys_base}
 		${src_debuggerServer}
 	)
-	
+
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_core} ${src_sys_base} ${src_stub_openal} ${src_stub_gl} ${src_debuggerServer})
 
 if(HARDLINK_GAME)
@@ -1332,9 +1331,9 @@ if(BASE AND NOT HARDLINK_GAME)
 	else()
 		add_library(base SHARED ${src_game})
 	endif()
-	
+
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX neo FILES ${src_game})
-	
+
 	set_target_properties(base PROPERTIES PREFIX "")
 	set_target_properties(base PROPERTIES COMPILE_DEFINITIONS "GAME_DLL")
 	target_include_directories(base PRIVATE "${CMAKE_SOURCE_DIR}/game")
