@@ -32,10 +32,11 @@ Compared to the original _DOOM 3_, the changes of _dhewm 3_ worth mentioning are
 - OpenAL for audio output, all OS-specific audio backends are gone
 - OpenAL EFX for EAX reverb effects (read: EAX-like sound effects on all platforms/hardware)
 - Gamepad support
+    - *Rumble* is currently **not** supported
 - Better support for widescreen (and arbitrary display resolutions)
 - A portable build system based on CMake
 - (Cross-)compilation with MinGW-w64
-- An advanced, mod-independent settings menu (opened with `F10` by default)
+- An **advanced**, mod-independent **settings menu** (opened with `F10` by default)
 
 See [Changelog.md](./Changelog.md) for a more complete changelog.
 
@@ -60,7 +61,7 @@ See https://dhewm3.org/#how-to-install for game data installation instructions.
 ## Configuration
 
 See [Configuration.md](./Configuration.md) for dhewm3-specific configuration, especially for 
-using gamepads or the new settings menu.
+using gamepads or the **new settings menu**.
 
 ## Compiling
 
